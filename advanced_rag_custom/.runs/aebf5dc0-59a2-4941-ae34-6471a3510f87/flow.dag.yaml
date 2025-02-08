@@ -1,0 +1,107 @@
+id: bring_your_own_data_qna
+name: Bring Your Own Data QnA
+inputs:
+  question:
+    type: string
+    default: How to use SDK V2?
+    is_chat_input: false
+outputs:
+  output:
+    type: string
+    reference: ${answer_the_question_custom.output}
+nodes:
+- name: generate_prompt_context
+  type: python
+  source:
+    type: code
+    path: generate_prompt_context.py
+  inputs:
+    search_result: ${lookup00.output}
+  use_variants: false
+- name: answer_the_question_custom
+  type: python
+  source:
+    type: code
+    path: answer_the_question_custom.py
+  inputs:
+    conn: AIGatewayCustom
+    contexts1: ${prompt_variants00_custom.output}
+    question: ${inputs.question}
+  use_variants: false
+- name: create_json_for_query
+  type: python
+  source:
+    type: code
+    path: create_json_for_query.py
+  inputs:
+    input1: ${generate_query_custom.output}
+  use_variants: false
+- name: get_query00
+  type: python
+  source:
+    type: code
+    path: get_query.py
+  inputs:
+    input1: ${create_json_for_query.output}
+  use_variants: false
+- name: prompt_variants00_custom
+  type: python
+  source:
+    type: code
+    path: prompt_variants00_custom.py
+  inputs:
+    chunk: ${generate_prompt_context.output.chunk}
+    conn: AIGatewayCustom
+    filename: ${generate_prompt_context.output.filename}
+    question: ${inputs.question}
+  use_variants: false
+- name: lookup00
+  type: python
+  source:
+    type: package
+    tool: promptflow_vectordb.tool.common_index_lookup.search
+  inputs:
+    mlindex_content: >
+      embeddings:
+        api_base: https://ai-lab-mock.openai.azure.com/
+        api_type: azure
+        api_version: 2023-07-01-preview
+        batch_size: '1'
+        connection:
+          id: /subscriptions/7acd21d4-1790-4c1d-9b01-02b72929a038/resourceGroups/rg-ai-lab/providers/Microsoft.MachineLearningServices/workspaces/ai-lab-project/connections/ai-lab-mock_aoai
+        connection_type: workspace_connection
+        deployment: text-embedding-ada-002
+        dimension: 1536
+        kind: open_ai
+        model: text-embedding-ada-002
+        schema_version: '2'
+      index:
+        api_version: 2024-05-01-preview
+        connection:
+          id: /subscriptions/7acd21d4-1790-4c1d-9b01-02b72929a038/resourceGroups/rg-ai-lab/providers/Microsoft.MachineLearningServices/workspaces/ai-lab-project/connections/searchailab325587371284
+        connection_type: workspace_connection
+        endpoint: https://search-ai-lab325587371284.search.windows.net/
+        engine: azure-sdk
+        field_mapping:
+          content: content
+          embedding: contentVector
+          metadata: meta_json_string
+        index: overview-sample
+        kind: acs
+        semantic_configuration_name: azureml-default
+    queries: ${get_query00.output}
+    query_type: Keyword
+    top_k: 3
+  use_variants: false
+- name: generate_query_custom
+  type: python
+  source:
+    type: code
+    path: generate_query_custom.py
+  inputs:
+    conn: AIGatewayCustom
+    input_text: ${inputs.question}
+  use_variants: false
+node_variants: {}
+environment:
+  python_requirements_txt: requirements.txt

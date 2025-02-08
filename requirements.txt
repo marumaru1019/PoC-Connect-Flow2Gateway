@@ -1,0 +1,3 @@
+promptflow_vectordb[azure]
+promptflow
+promptflow-tools

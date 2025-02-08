@@ -1,0 +1,108 @@
+id: bring_your_own_data_qna
+name: Bring Your Own Data QnA
+environment:
+  python_requirements_txt: requirements.txt
+inputs:
+  question:
+    type: string
+    default: How to use SDK V2?
+    is_chat_input: false
+outputs:
+  output:
+    type: string
+    reference: ${answer_the_question_custom.output}
+nodes:
+- name: generate_prompt_context
+  type: python
+  source:
+    type: code
+    path: generate_prompt_context.py
+  inputs:
+    search_result: ${lookup00.output}
+  use_variants: false
+- name: answer_the_question_custom
+  type: python
+  source:
+    type: code
+    path: answer_the_question_custom.py
+  inputs:
+    conn: custom_connection_custom
+    contexts1: ${prompt_variants00_custom.output}
+    question: ${inputs.question}
+  use_variants: false
+- name: create_json_for_query
+  type: python
+  source:
+    type: code
+    path: create_json_for_query.py
+  inputs:
+    input1: ${generate_query_custom.output}
+  use_variants: false
+- name: get_query00
+  type: python
+  source:
+    type: code
+    path: get_query.py
+  inputs:
+    input1: ${create_json_for_query.output}
+  use_variants: false
+- name: prompt_variants00_custom
+  type: python
+  source:
+    type: code
+    path: prompt_variants00_custom.py
+  inputs:
+    chunk: ${generate_prompt_context.output.chunk}
+    conn: custom_connection_custom
+    filename: ${generate_prompt_context.output.filename}
+    question: ${inputs.question}
+  use_variants: false
+- name: lookup00
+  type: python
+  source:
+    type: package
+    tool: promptflow_vectordb.tool.common_index_lookup.search
+  inputs:
+    mlindex_content: >
+      embeddings:
+        api_base: https://your-api-base-url/
+        api_type: azure
+        api_version: 2023-07-01-preview
+        batch_size: '1'
+        connection:
+          id: /subscriptions/your-subscription-id/resourceGroups/your-resource-group/providers/Microsoft.MachineLearningServices/workspaces/your-workspace/connections/your-connection-id
+        connection_type: workspace_connection
+        deployment: text-embedding-ada-002
+        dimension: 1536
+        kind: open_ai
+        model: text-embedding-ada-002
+        schema_version: '2'
+      index:
+        api_version: 2024-05-01-preview
+        connection:
+          id: /subscriptions/your-subscription-id/resourceGroups/your-resource-group/providers/Microsoft.MachineLearningServices/workspaces/your-workspace/connections/your-index-connection-id
+        connection_type: workspace_connection
+        endpoint: https://your-search-endpoint/
+        engine: azure-sdk
+        field_mapping:
+          content: content
+          embedding: contentVector
+          metadata: meta_json_string
+        index: your-index-name
+        kind: acs
+        semantic_configuration_name: azureml-default
+    queries: ${get_query00.output}
+    query_type: Keyword
+    top_k: 3
+  use_variants: false
+- name: generate_query_custom
+  type: python
+  source:
+    type: code
+    path: generate_query_custom.py
+  inputs:
+    conn: custom_connection_custom
+    input_text: ${inputs.question}
+  use_variants: false
+environment_variables:
+  PF_DISABLE_TRACING: true

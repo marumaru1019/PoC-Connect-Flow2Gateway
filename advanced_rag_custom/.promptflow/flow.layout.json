@@ -1,0 +1,67 @@
+{
+  "orientation": "Vertical",
+  "nodeLayouts": {
+    "inputs": {
+      "x": 465,
+      "y": 42,
+      "index": -1
+    },
+    "generate_prompt_context": {
+      "x": 140,
+      "y": 712,
+      "height": 75,
+      "index": 0
+    },
+    "create_json_for_query": {
+      "x": 140,
+      "y": 310,
+      "height": 75,
+      "index": 2
+    },
+    "get_query00": {
+      "x": 140,
+      "y": 444,
+      "height": 75,
+      "index": 3
+    },
+    "lookup00": {
+      "x": 140,
+      "y": 578,
+      "height": 75,
+      "index": 5
+    },
+    "generate_query_custom": {
+      "x": 140,
+      "y": 176,
+      "height": 75,
+      "index": 6
+    },
+    "outputs": {
+      "x": 395,
+      "y": 1114,
+      "index": -1
+    },
+    "prompt_variants00_custom": {
+      "x": 227.5,
+      "y": 846,
+      "height": 75,
+      "index": 4
+    },
+    "answer_the_question_custom": {
+      "x": 315,
+      "y": 980,
+      "height": 75,
+      "index": 1
+    }
+  },
+  "viewport": {
+    "transformMatrix": [
+      0.8547028897323669,
+      0,
+      0,
+      0.8547028897323669,
+      182.0483080137692,
+      -302.164162622293
+    ]
+  }
+}
